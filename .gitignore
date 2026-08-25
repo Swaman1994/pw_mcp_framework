@@ -9,3 +9,5 @@ node_modules/
 /.playwright-mcp/
 /*.png
 /README.md
+/allure-results/
+/allure-report/
