@@ -32,6 +32,9 @@ jobs:
     - name: Generate Allure report
       if: ${{ always() }}
       run: npm run allure:generate
+    - name: Generate standalone Allure HTML report
+      if: ${{ always() }}
+      run: npm run allure:generate:single
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
@@ -43,6 +46,12 @@ jobs:
       with:
         name: allure-report
         path: allure-report/
+        retention-days: 30
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: allure-report-standalone
+        path: allure-report-single/index.html
         retention-days: 30
     - name: Upload Allure report to GitHub Pages
       if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
