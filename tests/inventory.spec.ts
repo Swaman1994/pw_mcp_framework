@@ -12,34 +12,46 @@ async function loggedInInventory(page: Page): Promise<InventoryPage> {
 
 test.describe('SauceDemo inventory', () => {
     test('displays products and sorts by name and price @smoke @regression', async ({ page }) => {
-        const inventory = await loggedInInventory(page);
-        await expect(inventory.productsHeading).toBeVisible();
-        await expect(inventory.productImages).toHaveCount(6);
-
-        await inventory.sortBy(data.sortOptions.nameDescending);
-        await expect(inventory.sortSelect).toHaveValue(data.sortOptions.nameDescending);
-        await inventory.sortBy(data.sortOptions.priceAscending);
-        await expect(inventory.sortSelect).toHaveValue(data.sortOptions.priceAscending);
-        await inventory.sortBy(data.sortOptions.priceDescending);
-        await expect(inventory.sortSelect).toHaveValue(data.sortOptions.priceDescending);
+        const inventory = await test.step('Log in and verify the product list', () => loggedInInventory(page));
+        await test.step('Sort products by name descending', async () => {
+            await expect(inventory.productsHeading).toBeVisible();
+            await expect(inventory.productImages).toHaveCount(6);
+            await inventory.sortBy(data.sortOptions.nameDescending);
+            await expect(inventory.sortSelect).toHaveValue(data.sortOptions.nameDescending);
+        });
+        await test.step('Sort products by price ascending and descending', async () => {
+            await inventory.sortBy(data.sortOptions.priceAscending);
+            await expect(inventory.sortSelect).toHaveValue(data.sortOptions.priceAscending);
+            await inventory.sortBy(data.sortOptions.priceDescending);
+            await expect(inventory.sortSelect).toHaveValue(data.sortOptions.priceDescending);
+        });
     });
 
     test('adds two products and removes the first product @smoke @critical', async ({ page }) => {
-        const inventory = await loggedInInventory(page);
-        await inventory.addFirstProduct();
-        await expect(inventory.cartBadge).toHaveText('1');
-        await inventory.addSecondProduct();
-        await expect(inventory.cartBadge).toHaveText('2');
-        await inventory.removeFirstProduct();
-        await expect(inventory.cartBadge).toHaveText('1');
+        const inventory = await test.step('Log in to the inventory', () => loggedInInventory(page));
+        await test.step('Add two products and verify the cart count', async () => {
+            await inventory.addFirstProduct();
+            await expect(inventory.cartBadge).toHaveText('1');
+            await inventory.addSecondProduct();
+            await expect(inventory.cartBadge).toHaveText('2');
+        });
+        await test.step('Remove the first product and verify the cart count', async () => {
+            await inventory.removeFirstProduct();
+            await expect(inventory.cartBadge).toHaveText('1');
+        });
     });
 
     test('opens the navigation menu and exposes its actions @smoke', async ({ page }) => {
-        const inventory = await loggedInInventory(page);
-        await inventory.menu.open();
-        await expect(inventory.menu.allItemsLink).toBeVisible();
-        await expect(inventory.menu.aboutLink).toBeVisible();
-        await expect(inventory.menu.logoutLink).toBeVisible();
-        await expect(inventory.menu.resetAppStateLink).toBeVisible();
+        const inventory = await test.step('Log in and open the navigation menu', async () => {
+            const loggedIn = await loggedInInventory(page);
+            await loggedIn.menu.open();
+            return loggedIn;
+        });
+        await test.step('Verify the navigation menu actions', async () => {
+            await expect(inventory.menu.allItemsLink).toBeVisible();
+            await expect(inventory.menu.aboutLink).toBeVisible();
+            await expect(inventory.menu.logoutLink).toBeVisible();
+            await expect(inventory.menu.resetAppStateLink).toBeVisible();
+        });
     });
 });

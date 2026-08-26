@@ -5,18 +5,22 @@ import data from '../src/data/data.js';
 
 test.describe('SauceDemo product details', () => {
   test('opens a product detail page and returns to products @smoke', async ({ page }) => {
-    const login = new LoginPage(page);
-    await login.goto();
-    const inventory = await login.loginAs(data.users.standard.username, data.users.standard.password);
-    const details = await inventory.openProduct(data.products.backpack);
-
-    await expect(details.productName).toContainText(data.products.backpack);
-    await expect(details.productDescription).toBeVisible();
-    await expect(details.productPrice).toHaveText('$29.99');
-    await expect(details.productImage).toBeVisible();
-    await expect(details.cartButton).toHaveText('Add to cart');
-
-    const returnedInventory = await details.backToProducts();
-    await expect(returnedInventory.productsHeading).toBeVisible();
+    const details = await test.step('Log in and open the backpack details', async () => {
+      const login = new LoginPage(page);
+      await login.goto();
+      const inventory = await login.loginAs(data.users.standard.username, data.users.standard.password);
+      return inventory.openProduct(data.products.backpack);
+    });
+    await test.step('Verify the backpack details', async () => {
+      await expect(details.productName).toContainText(data.products.backpack);
+      await expect(details.productDescription).toBeVisible();
+      await expect(details.productPrice).toHaveText('$29.99');
+      await expect(details.productImage).toBeVisible();
+      await expect(details.cartButton).toHaveText('Add to cart');
+    });
+    await test.step('Return to the products page', async () => {
+      const returnedInventory = await details.backToProducts();
+      await expect(returnedInventory.productsHeading).toBeVisible();
+    });
   });
 });
