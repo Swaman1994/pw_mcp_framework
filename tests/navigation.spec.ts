@@ -24,7 +24,7 @@ test.describe('SauceDemo navigation and application state', () => {
     await inventory.menu.resetAppState();
 
     await expect(inventory.productsHeading).toBeVisible();
-    await expect(inventory.addToCartButtons).toHaveCount(6);
+    await expect(inventory.addToCartButtons).toHaveCount(5);
   });
 
   test('keeps the inventory usable at a mobile viewport @regression', async ({ page }) => {

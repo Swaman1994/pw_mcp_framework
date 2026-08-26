@@ -11,7 +11,7 @@ export class CheckoutCompletePage extends BasePage {
     constructor(page: Page) {
         super(page);
         this.completeHeading = this.getByText('Checkout: Complete!', { exact: true });
-        this.confirmationMessage = this.getByText(/Thank you for your order|dispatched/);
+        this.confirmationMessage = this.getByText('Thank you for your order!');
         this.confirmationImage = this.getByRole('img');
         this.backHomeButton = this.getByRole('button', { name: /Back Home/ });
     }
