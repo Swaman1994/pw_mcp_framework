@@ -53,6 +53,26 @@ jobs:
         name: allure-report-standalone
         path: allure-report-single/index.html
         retention-days: 30
+    # Configure these five repository secrets: SMTP_SERVER, SMTP_PORT, SMTP_USERNAME,
+    # SMTP_PASSWORD, and REPORT_EMAIL_FROM.
+    - name: Email the Allure test report
+      if: ${{ always() && !cancelled() }}
+      uses: dawidd6/action-send-mail@v18
+      with:
+        server_address: ${{ secrets.SMTP_SERVER }}
+        server_port: ${{ secrets.SMTP_PORT }}
+        username: ${{ secrets.SMTP_USERNAME }}
+        password: ${{ secrets.SMTP_PASSWORD }}
+        subject: Playwright test report - ${{ job.status == 'success' && 'all tests passed' || 'action needed' }}
+        to: swaman094@gmail.com
+        from: ${{ secrets.REPORT_EMAIL_FROM }}
+        html_body: |
+          <h2>Playwright test report</h2>
+          <p>The automated test run for <strong>${{ github.repository }}</strong> has completed.</p>
+          <p><strong>Status:</strong> ${{ job.status }}</p>
+          <p><a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/">Open the full Allure report on GitHub Pages</a></p>
+          <p>The standalone Allure HTML report is attached to this email.</p>
+        attachments: allure-report-single/index.html
     - name: Upload Allure report to GitHub Pages
       if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       uses: actions/upload-pages-artifact@v3
