@@ -1,44 +1,51 @@
-import { test, expect } from '../src/fixtures/base.js';
+import { test, expect, attachStepScreenshot } from '../src/fixtures/base.js';
 import { LoginPage } from '../src/pages/LoginPage.js';
 import data from '../src/data/data.js';
 
 test.describe('SauceDemo login', () => {
-  test('logs in with a valid standard user @smoke @critical', async ({ page }) => {
+  test('logs in with a valid standard user @smoke @critical', async ({ page }, testInfo) => {
     const inventory = await test.step('Log in with the standard user', async () => {
       const login = new LoginPage(page);
       await login.goto();
-      return login.loginAs(data.users.standard.username, data.users.standard.password);
+      const inventory = await login.loginAs(data.users.standard.username, data.users.standard.password);
+      await attachStepScreenshot(page, testInfo, 'Log in with the standard user');
+      return inventory;
     });
 
     await test.step('Verify the inventory page loaded', async () => {
       await expect(inventory.productsHeading).toBeVisible();
       await expect(inventory.productImages).toHaveCount(6);
+      await attachStepScreenshot(page, testInfo, 'Verify the inventory page loaded');
     });
   });
 
-  test('rejects invalid credentials @smoke @critical', async ({ page }) => {
+  test('rejects invalid credentials @smoke @critical', async ({ page }, testInfo) => {
     const login = new LoginPage(page);
     await test.step('Submit invalid credentials', async () => {
       await login.goto();
       await login.loginAs('invalid_user', 'invalid_password');
+      await attachStepScreenshot(page, testInfo, 'Submit invalid credentials');
     });
 
     await test.step('Verify the invalid credentials message', async () => {
       await expect(login.errorMessage).toContainText('Username and password do not match');
       await expect(login.loginButton).toBeVisible();
+      await attachStepScreenshot(page, testInfo, 'Verify the invalid credentials message');
     });
   });
 
-  test('shows the locked-out user message @regression', async ({ page }) => {
+  test('shows the locked-out user message @regression', async ({ page }, testInfo) => {
     const login = new LoginPage(page);
     await test.step('Submit locked-out user credentials', async () => {
       await login.goto();
       await login.loginAs(data.users.lockedOut.username, data.users.lockedOut.password);
+      await attachStepScreenshot(page, testInfo, 'Submit locked-out user credentials');
     });
 
     await test.step('Verify the locked-out message', async () => {
       await expect(login.errorMessage).toContainText('locked out');
       await expect(login.loginButton).toBeVisible();
+      await attachStepScreenshot(page, testInfo, 'Verify the locked-out message');
     });
   });
 });
